@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="theme-color" content="#7b2cff" />
+  <meta name="description" content="Controle de lucro, custo e faturamento de acessos IPTV." />
+
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Lucro IPTV" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+
+  <title>Controle de Lucro IPTV | Canais Flex</title>
+
+  <style>
+    :root {
+      --bg: #12061f;
+      --card: rgba(255,255,255,.08);
+      --text: #fff;
+      --muted: rgba(255,255,255,.68);
+      --purple: #8b2cff;
+      --purple2: #c43cff;
+      --green: #2df59a;
+      --red: #ff5571;
+      --yellow: #ffd35a;
+      --border: rgba(255,255,255,.14);
+      --shadow: 0 22px 60px rgba(0,0,0,.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(196,60,255,.35), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(139,44,255,.35), transparent 35%),
+        linear-gradient(135deg, #0d0418, #1a0730 55%, #23083d);
+      padding: 18px;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      background: rgba(255,255,255,.07);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      width: min(430px, 100%);
+    }
+
+    .inline-logo {
+      width: 100%;
+      max-width: 430px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 16px 30px rgba(0,0,0,.30));
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button, .file-label {
+      border: 0;
+      color: #fff;
+      font-weight: 800;
+      border-radius: 14px;
+      padding: 12px 15px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--purple), var(--purple2));
+      box-shadow: 0 12px 26px rgba(139,44,255,.25);
+      transition: .18s ease;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    button:hover, .file-label:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    button.secondary, .file-label.secondary {
+      background: rgba(255,255,255,.12);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    button.danger {
+      background: rgba(255,85,113,.16);
+      border: 1px solid rgba(255,85,113,.35);
+      color: #ffd9df;
+      box-shadow: none;
+    }
+
+    .install-btn {
+      background: linear-gradient(135deg, #2df59a, #8b2cff);
+      box-shadow: 0 12px 26px rgba(45,245,154,.16);
+    }
+
+    .install-panel {
+      display: none;
+      margin: 0 0 18px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 14px 34px rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .install-panel strong {
+      color: #fff;
+    }
+
+    .install-panel ol {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .install-panel li {
+      margin: 6px 0;
+    }
+
+    .status {
+      margin: 0 0 18px;
+      padding: 13px 15px;
+      border-radius: 18px;
+      background: rgba(45,245,154,.09);
+      border: 1px solid rgba(45,245,154,.2);
+      color: rgba(255,255,255,.82);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .status.warn {
+      background: rgba(255,211,90,.10);
+      border-color: rgba(255,211,90,.25);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      padding: 16px;
+      border-radius: 22px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 14px 34px rgba(0,0,0,.18);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-size: clamp(21px, 3vw, 31px);
+      line-height: 1;
+    }
+
+    .metric.green strong { color: var(--green); }
+    .metric.red strong { color: var(--red); }
+    .metric.yellow strong { color: var(--yellow); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .card-title {
+      font-size: 19px;
+      font-weight: 900;
+      margin: 0 0 14px;
+    }
+
+    label {
+      display: block;
+      margin: 13px 0 7px;
+      color: rgba(255,255,255,.78);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 16px;
+      padding: 14px 14px;
+      outline: none;
+      color: #fff;
+      background: rgba(255,255,255,.09);
+      font-size: 16px;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: rgba(255,255,255,.38);
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .preview-profit {
+      margin-top: 14px;
+      border-radius: 20px;
+      padding: 15px;
+      background: rgba(45,245,154,.1);
+      border: 1px solid rgba(45,245,154,.22);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .preview-profit small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .preview-profit strong {
+      font-size: 26px;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .form-actions {
+      margin-top: 15px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .search {
+      flex: 1;
+      min-width: 210px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      background: rgba(0,0,0,.16);
+    }
+
+    th, td {
+      padding: 13px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      color: rgba(255,255,255,.75);
+      background: rgba(255,255,255,.07);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,.04);
+    }
+
+    .profit-pos {
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .profit-neg {
+      color: var(--red);
+      font-weight: 900;
+    }
+
+    .actions {
+      display: flex;
+      gap: 7px;
+    }
+
+    .actions button {
+      padding: 9px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .footer-note {
+      margin: 14px 2px 0;
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    #importFile {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .brand {
+        width: 100%;
+      }
+
+      .inline-logo {
+        max-width: 100%;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .header-actions button,
+      .header-actions .file-label {
+        flex: 1;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 12px;
+      }
+
+      header, .card {
+        border-radius: 22px;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      button, .file-label {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header>
+      <div class="brand" aria-label="Canais Flex Controle de Lucro">
+        <svg class="inline-logo" viewBox="0 0 760 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Canais Flex Controle de Lucro">
+          <defs>
+            <linearGradient id="logoGradient1" x1="0" y1="0" x2="760" y2="220" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#7B2CFF"/>
+              <stop offset="0.55" stop-color="#B832FF"/>
+              <stop offset="1" stop-color="#E05BFF"/>
+            </linearGradient>
+
+            <linearGradient id="logoGradient2" x1="58" y1="34" x2="182" y2="164" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF"/>
+              <stop offset="1" stop-color="#E9C8FF"/>
+            </linearGradient>
+
+            <filter id="logoShadow" x="-20%" y="-30%" width="140%" height="160%">
+              <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="18" flood-color="#C43CFF" flood-opacity="0.45"/>
+            </filter>
+          </defs>
+
+          <rect x="8" y="8" width="744" height="204" rx="48" fill="#170725" stroke="url(#logoGradient1)" stroke-width="7"/>
+
+          <g filter="url(#logoShadow)">
+            <rect x="42" y="38" width="144" height="144" rx="38" fill="url(#logoGradient1)"/>
+            <path d="M82 78H128C149 78 164 92 164 111C164 130 149 144 128 144H101V160H82V78ZM101 96V126H126C137 126 144 120 144 111C144 102 137 96 126 96H101Z" fill="url(#logoGradient2)"/>
+            <path d="M92 70C112 54 143 54 164 74" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+          </g>
+
+          <text x="214" y="105" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="900" letter-spacing="-2">
+            CANAIS FLEX
+          </text>
+
+          <text x="218" y="148" fill="#E6C8FF" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="800" letter-spacing="2">
+            CONTROLE DE LUCRO
+          </text>
+
+          <text x="218" y="177" fill="#BFA6D9" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">
+            vendas • custos • lucro • backup local
+          </text>
+        </svg>
+      </div>
+
+      <div class="header-actions">
+        <button id="installBtn" class="install-btn" onclick="installApp()">Instalar app</button>
+        <button class="secondary" onclick="exportCSV()">Exportar CSV</button>
+        <button class="secondary" onclick="exportBackup()">Backup JSON</button>
+        <label for="importFile" class="file-label secondary">Importar backup</label>
+        <input type="file" id="importFile" accept="application/json,.json" onchange="importBackup(event)" />
+        <button class="secondary" onclick="window.print()">Imprimir</button>
+        <button class="danger" onclick="clearAll()">Limpar tudo</button>
+      </div>
+    </header>
+
+    <div id="installPanel" class="install-panel">
+      <strong>Como instalar no celular:</strong>
+      <ol>
+        <li>Suba a pasta do projeto em um endereço com HTTPS, como GitHub Pages, Vercel ou Netlify.</li>
+        <li>Abra o link pelo Google Chrome no Android.</li>
+        <li>Toque em <strong>Instalar app</strong> ou no menu de três pontinhos e escolha <strong>Adicionar à tela inicial</strong>.</li>
+      </ol>
+    </div>
+
+    <p class="status" id="storageStatus">
+      Salvamento local ativo: suas vendas ficam salvas na memória do navegador deste aparelho.
+    </p>
+
+    <section class="metrics">
+      <div class="metric yellow">
+        <span>Faturamento total</span>
+        <strong id="totalRevenue">R$ 0,00</strong>
+      </div>
+
+      <div class="metric red">
+        <span>Custo total</span>
+        <strong id="totalCost">R$ 0,00</strong>
+      </div>
+
+      <div class="metric green">
+        <span>Lucro total</span>
+        <strong id="totalProfit">R$ 0,00</strong>
+      </div>
+
+      <div class="metric">
+        <span>Acessos vendidos</span>
+        <strong id="totalSales">0</strong>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card form-card">
+        <div class="card-body">
+          <h2 class="card-title" id="formTitle">Adicionar venda</h2>
+
+          <input type="hidden" id="editId" />
+
+          <label>Data da venda</label>
+          <input type="date" id="date" />
+
+          <label>Cliente ou identificação</label>
+          <input type="text" id="client" placeholder="Ex: João, Maria, Cliente 01..." />
+
+          <div class="row">
+            <div>
+              <label>Valor vendido</label>
+              <input type="number" id="salePrice" placeholder="Ex: 30" step="0.01" min="0" inputmode="decimal" />
+            </div>
+
+            <div>
+              <label>Custo do crédito</label>
+              <input type="number" id="cost" placeholder="Ex: 12" step="0.01" min="0" inputmode="decimal" />
+            </div>
+          </div>
+
+          <label>Observação</label>
+          <textarea id="note" placeholder="Ex: plano mensal, renovação, teste convertido..."></textarea>
+
+          <div class="preview-profit">
+            <small>Lucro dessa venda</small>
+            <strong id="profitPreview">R$ 0,00</strong>
+          </div>
+
+          <div class="form-actions">
+            <button onclick="saveSale()" id="saveBtn">Adicionar venda</button>
+            <button class="secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Cancelar edição</button>
+          </div>
+
+          <p class="footer-note">
+            Os dados são salvos em localStorage. Isso significa que ficam neste navegador/aparelho.
+            Para segurança, faça backup JSON de vez em quando.
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="toolbar">
+            <h2 class="card-title" style="margin:0;">Vendas adicionadas</h2>
+            <input class="search" type="text" id="search" placeholder="Buscar cliente ou observação..." oninput="render()" />
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Cliente</th>
+                  <th>Vendido</th>
+                  <th>Custo</th>
+                  <th>Lucro</th>
+                  <th>Obs.</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+
+          <div id="emptyState" class="empty" style="display:none;">
+            Nenhuma venda adicionada ainda.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "canaisflex_controle_lucro_iptv_v2";
+    const OLD_STORAGE_KEY = "canaisflex_controle_lucro_iptv_v1";
+
+    let sales = loadSales();
+    let deferredPrompt = null;
+    let swReady = false;
+
+    const els = {
+      editId: document.getElementById("editId"),
+      date: document.getElementById("date"),
+      client: document.getElementById("client"),
+      salePrice: document.getElementById("salePrice"),
+      cost: document.getElementById("cost"),
+      note: document.getElementById("note"),
+      profitPreview: document.getElementById("profitPreview"),
+      tableBody: document.getElementById("tableBody"),
+      emptyState: document.getElementById("emptyState"),
+      totalRevenue: document.getElementById("totalRevenue"),
+      totalCost: document.getElementById("totalCost"),
+      totalProfit: document.getElementById("totalProfit"),
+      totalSales: document.getElementById("totalSales"),
+      search: document.getElementById("search"),
+      formTitle: document.getElementById("formTitle"),
+      saveBtn: document.getElementById("saveBtn"),
+      cancelBtn: document.getElementById("cancelBtn"),
+      storageStatus: document.getElementById("storageStatus"),
+      installPanel: document.getElementById("installPanel")
+    };
+
+    function isStandalone() {
+      return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    }
+
+    function isSecurePwaContext() {
+      return location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    }
+
+    function updateInstallStatus() {
+      if (isStandalone()) {
+        els.storageStatus.textContent = "App instalado: salvamento local ativo neste aparelho.";
+        els.storageStatus.classList.remove("warn");
+        return;
+      }
+
+      if (!isSecurePwaContext()) {
+        els.storageStatus.innerHTML = "Salvamento local ativo. Para aparecer a opção de instalar como app, abra por um link <strong>HTTPS</strong>. Arquivo aberto direto não libera instalação PWA.";
+        els.storageStatus.classList.add("warn");
+      }
+    }
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.finally(() => {
+          deferredPrompt = null;
+        });
+        return;
+      }
+
+      els.installPanel.style.display = els.installPanel.style.display === "block" ? "none" : "block";
+
+      if (!isSecurePwaContext()) {
+        alert("Para instalar como PWA, hospede esse projeto em HTTPS. Abrindo arquivo direto no celular, o navegador salva os dados, mas não libera instalação como app.");
+        return;
+      }
+
+      if (isStandalone()) {
+        alert("Esse app já está instalado.");
+        return;
+      }
+
+      alert("Se o botão nativo não abrir, toque nos três pontinhos do Chrome e escolha 'Adicionar à tela inicial' ou 'Instalar app'.");
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      els.storageStatus.textContent = "Pronto para instalar: toque no botão 'Instalar app'.";
+      els.storageStatus.classList.remove("warn");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      els.storageStatus.textContent = "App instalado com sucesso. Salvamento local ativo neste aparelho.";
+      els.storageStatus.classList.remove("warn");
+    });
+
+    function loadSales() {
+      try {
+        const current = localStorage.getItem(STORAGE_KEY);
+        if (current) return JSON.parse(current);
+
+        const old = localStorage.getItem(OLD_STORAGE_KEY);
+        if (old) {
+          localStorage.setItem(STORAGE_KEY, old);
+          return JSON.parse(old);
+        }
+
+        return [];
+      } catch (error) {
+        alert("Não foi possível carregar os dados salvos.");
+        return [];
+      }
+    }
+
+    function today() {
+      const d = new Date();
+      const offset = d.getTimezoneOffset();
+      const local = new Date(d.getTime() - offset * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function money(value) {
+      const number = Number(value || 0);
+      return number.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sales));
+        updateInstallStatus();
+      } catch (error) {
+        els.storageStatus.textContent = "Atenção: o navegador bloqueou o salvamento local. Exporte um backup.";
+        els.storageStatus.classList.add("warn");
+        alert("Não consegui salvar localmente. O armazenamento do navegador pode estar bloqueado ou cheio.");
+      }
+    }
+
+    function calculatePreview() {
+      const salePrice = Number(els.salePrice.value || 0);
+      const cost = Number(els.cost.value || 0);
+      const profit = salePrice - cost;
+
+      els.profitPreview.textContent = money(profit);
+      els.profitPreview.style.color = profit < 0 ? "var(--red)" : "var(--green)";
+    }
+
+    function saveSale() {
+      const date = els.date.value || today();
+      const client = els.client.value.trim();
+      const salePrice = Number(els.salePrice.value || 0);
+      const cost = Number(els.cost.value || 0);
+      const note = els.note.value.trim();
+
+      if (salePrice <= 0) {
+        alert("Coloque o valor que você vendeu o acesso.");
+        els.salePrice.focus();
+        return;
+      }
+
+      if (cost < 0) {
+        alert("O custo não pode ser negativo.");
+        els.cost.focus();
+        return;
+      }
+
+      const editId = els.editId.value;
+      const item = {
+        id: editId || makeId(),
+        date,
+        client: client || "Sem nome",
+        salePrice,
+        cost,
+        profit: salePrice - cost,
+        note,
+        createdAt: editId ? undefined : new Date().toISOString()
+      };
+
+      if (editId) {
+        sales = sales.map(s => s.id === editId ? { ...s, ...item, createdAt: s.createdAt } : s);
+      } else {
+        sales.unshift(item);
+      }
+
+      saveToStorage();
+      resetForm();
+      render();
+    }
+
+    function makeId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function editSale(id) {
+      const item = sales.find(s => s.id === id);
+      if (!item) return;
+
+      els.editId.value = item.id;
+      els.date.value = item.date;
+      els.client.value = item.client;
+      els.salePrice.value = item.salePrice;
+      els.cost.value = item.cost;
+      els.note.value = item.note || "";
+
+      els.formTitle.textContent = "Editar venda";
+      els.saveBtn.textContent = "Salvar alteração";
+      els.cancelBtn.style.display = "block";
+
+      calculatePreview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteSale(id) {
+      if (!confirm("Deseja apagar essa venda?")) return;
+
+      sales = sales.filter(s => s.id !== id);
+      saveToStorage();
+      render();
+    }
+
+    function clearAll() {
+      if (!sales.length) {
+        alert("Não existe nenhuma venda para limpar.");
+        return;
+      }
+
+      if (!confirm("Tem certeza que deseja apagar todas as vendas?")) return;
+
+      sales = [];
+      saveToStorage();
+      resetForm();
+      render();
+    }
+
+    function resetForm() {
+      els.editId.value = "";
+      els.date.value = today();
+      els.client.value = "";
+      els.salePrice.value = "";
+      els.cost.value = "";
+      els.note.value = "";
+      els.formTitle.textContent = "Adicionar venda";
+      els.saveBtn.textContent = "Adicionar venda";
+      els.cancelBtn.style.display = "none";
+
+      calculatePreview();
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return "-";
+
+      const [y, m, d] = dateString.split("-");
+      return `${d}/${m}/${y}`;
+    }
+
+    function getFilteredSales() {
+      const q = (els.search.value || "").toLowerCase().trim();
+
+      if (!q) return sales;
+
+      return sales.filter(s =>
+        String(s.client || "").toLowerCase().includes(q) ||
+        String(s.note || "").toLowerCase().includes(q) ||
+        String(s.date || "").toLowerCase().includes(q)
+      );
+    }
+
+    function render() {
+      const filtered = getFilteredSales();
+      const totalRevenue = sales.reduce((sum, s) => sum + Number(s.salePrice || 0), 0);
+      const totalCost = sales.reduce((sum, s) => sum + Number(s.cost || 0), 0);
+      const totalProfit = totalRevenue - totalCost;
+
+      els.totalRevenue.textContent = money(totalRevenue);
+      els.totalCost.textContent = money(totalCost);
+      els.totalProfit.textContent = money(totalProfit);
+      els.totalSales.textContent = sales.length;
+
+      els.tableBody.innerHTML = filtered.map(s => {
+        const profitClass = Number(s.profit) < 0 ? "profit-neg" : "profit-pos";
+
+        return `
+          <tr>
+            <td>${formatDate(s.date)}</td>
+            <td>${escapeHtml(s.client || "Sem nome")}</td>
+            <td>${money(s.salePrice)}</td>
+            <td>${money(s.cost)}</td>
+            <td class="${profitClass}">${money(s.profit)}</td>
+            <td>${escapeHtml(s.note || "-")}</td>
+            <td>
+              <div class="actions">
+                <button class="secondary" onclick="editSale('${s.id}')">Editar</button>
+                <button class="danger" onclick="deleteSale('${s.id}')">Apagar</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      els.emptyState.style.display = filtered.length ? "none" : "block";
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function exportCSV() {
+      if (!sales.length) {
+        alert("Adicione pelo menos uma venda antes de exportar.");
+        return;
+      }
+
+      const headers = ["Data", "Cliente", "Valor vendido", "Custo", "Lucro", "Observacao"];
+      const rows = sales.map(s => [
+        formatDate(s.date),
+        s.client,
+        String(Number(s.salePrice || 0).toFixed(2)).replace(".", ","),
+        String(Number(s.cost || 0).toFixed(2)).replace(".", ","),
+        String(Number(s.profit || 0).toFixed(2)).replace(".", ","),
+        s.note || ""
+      ]);
+
+      const csv = [headers, ...rows]
+        .map(row => row.map(field => `"${String(field).replaceAll('"', '""')}"`).join(";"))
+        .join("\n");
+
+      downloadFile("\ufeff" + csv, "controle-lucro-iptv-canais-flex.csv", "text/csv;charset=utf-8;");
+    }
+
+    function exportBackup() {
+      const backup = {
+        app: "Controle de Lucro IPTV Canais Flex",
+        version: 5,
+        exportedAt: new Date().toISOString(),
+        sales
+      };
+
+      downloadFile(
+        JSON.stringify(backup, null, 2),
+        "backup-controle-lucro-iptv-canais-flex.json",
+        "application/json;charset=utf-8;"
+      );
+    }
+
+    function importBackup(event) {
+      const file = event.target.files && event.target.files[0];
+
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = function() {
+        try {
+          const data = JSON.parse(reader.result);
+          const importedSales = Array.isArray(data) ? data : data.sales;
+
+          if (!Array.isArray(importedSales)) {
+            alert("Arquivo de backup inválido.");
+            return;
+          }
+
+          if (!confirm("Deseja importar esse backup? Isso vai substituir a tabela atual.")) {
+            return;
+          }
+
+          sales = importedSales.map(s => ({
+            id: s.id || makeId(),
+            date: s.date || today(),
+            client: s.client || "Sem nome",
+            salePrice: Number(s.salePrice || 0),
+            cost: Number(s.cost || 0),
+            profit: Number(s.salePrice || 0) - Number(s.cost || 0),
+            note: s.note || "",
+            createdAt: s.createdAt || new Date().toISOString()
+          }));
+
+          saveToStorage();
+          resetForm();
+          render();
+
+          alert("Backup importado com sucesso.");
+        } catch (error) {
+          alert("Não consegui importar esse arquivo.");
+        } finally {
+          event.target.value = "";
+        }
+      };
+
+      reader.readAsText(file, "utf-8");
+    }
+
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = filename;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    }
+
+    els.salePrice.addEventListener("input", calculatePreview);
+    els.cost.addEventListener("input", calculatePreview);
+
+    if ("serviceWorker" in navigator && isSecurePwaContext()) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .then(() => {
+            swReady = true;
+            updateInstallStatus();
+          })
+          .catch(() => {
+            els.storageStatus.innerHTML = "Salvamento local ativo. O Service Worker não foi registrado. Confira se está em HTTPS.";
+            els.storageStatus.classList.add("warn");
+          });
+      });
+    } else {
+      updateInstallStatus();
+    }
+
+    resetForm();
+    render();
+    updateInstallStatus();
+  </script>
+</body>
+</html>
